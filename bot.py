@@ -1,22 +1,22 @@
 import os
-from telegram.ext import Updater, CommandHandler
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-# قراءة التوكن من Secrets
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
 if not TOKEN:
     raise ValueError("Telegram bot token is missing! تأكد من إضافة التوكن في الإعدادات.")
 
-# مثال أمر بسيط
-def start(update, context):
-    update.message.reply_text("Hello! The bot is now running successfully 🎉")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("✅ البوت شغال! اكتب /ping للتجربة.")
 
-updater = Updater(token=TOKEN, use_context=True)
-dispatcher = updater.dispatcher
+async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("pong 🏓")
 
-# إضافة أمر /start
-dispatcher.add_handler(CommandHandler("start", start))
+def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("ping", ping))
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
 
-# تشغيل البوت
-updater.start_polling()
-updater.idle()
+if __name__ == "__main__":
+    main()
