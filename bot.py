@@ -1,18 +1,16 @@
 import os
-import httpx
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
-from telegram.request import HTTPXRequest
 
+# اقرأ التوكن من السكريت/المتغيرات
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
     raise ValueError("Missing TELEGRAM_BOT_TOKEN")
 
-# أنشئ عميل httpx مع تعطيل أي بروكسي من البيئة
-httpx_client = httpx.Client(trust_env=False, timeout=30.0)
-
-# مرّره إلى HTTPXRequest
-request = HTTPXRequest(httpx_client=httpx_client)
+# عطّل أي بروكسيات قادمة من البيئة حتى لا يمر الاتصال عبرها
+for k in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"):
+    os.environ.pop(k, None)
+os.environ["NO_PROXY"] = "api.telegram.org,telegram.org"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ البوت شغّال. اكتب /ping")
@@ -21,7 +19,7 @@ async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("pong 🏓")
 
 def main():
-    app = Application.builder().token(TOKEN).request(request).build()
+    app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("ping", ping))
     app.run_polling(allowed_updates=Update.ALL_TYPES)
