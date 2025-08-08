@@ -1,19 +1,27 @@
 import os
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.request import HTTPXRequest
 
-# جلب التوكن من Environment Variables أو Secrets
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8320369580:AAH1cOKkitU2jYQxG2NbpDbGmbq3h64TtqM")
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+if not TOKEN:
+    raise ValueError("Missing TELEGRAM_BOT_TOKEN")
 
-# دالة الرد على أمر /start
+# اطفي استخدام أي بروكسي/متغيرات نظام تلقائياً
+# trust_env=False يخلي httpx يتجاهل HTTP(S)_PROXY/ALL_PROXY
+request = HTTPXRequest(trust_env=False)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("✅ Hello! Gold Price Bot is working.")
+    await update.message.reply_text("✅ البوت شغّال. اكتب /ping")
 
-# إنشاء التطبيق وتشغيله
+async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("pong 🏓")
+
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = Application.builder().token(TOKEN).request(request).build()
     app.add_handler(CommandHandler("start", start))
-    app.run_polling()
+    app.add_handler(CommandHandler("ping", ping))
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
