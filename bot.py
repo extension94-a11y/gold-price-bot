@@ -1,18 +1,22 @@
 import os
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import Updater, CommandHandler
 
+# قراءة التوكن من Secrets
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("✅ البوت شغال! أرسل /gold لعرض سعر الذهب.")
+if not TOKEN:
+    raise ValueError("Telegram bot token is missing! تأكد من إضافة التوكن في الإعدادات.")
 
-async def gold(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("سعر الذهب اليوم: 2334 دولار للأونصة 💰")
+# مثال أمر بسيط
+def start(update, context):
+    update.message.reply_text("Hello! The bot is now running successfully 🎉")
 
-app = ApplicationBuilder().token(TOKEN).build()
+updater = Updater(token=TOKEN, use_context=True)
+dispatcher = updater.dispatcher
 
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("gold", gold))
+# إضافة أمر /start
+dispatcher.add_handler(CommandHandler("start", start))
 
-app.run_polling()
+# تشغيل البوت
+updater.start_polling()
+updater.idle()
