@@ -2,13 +2,12 @@ import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# اقرأ التوكن من السكريت/المتغيرات
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
     raise ValueError("Missing TELEGRAM_BOT_TOKEN")
 
-# عطّل أي بروكسيات قادمة من البيئة حتى لا يمر الاتصال عبرها
-for k in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"):
+# تعطيل أي بروكسي موروث
+for k in ("HTTP_PROXY","HTTPS_PROXY","ALL_PROXY","http_proxy","https_proxy","all_proxy"):
     os.environ.pop(k, None)
 os.environ["NO_PROXY"] = "api.telegram.org,telegram.org"
 
